@@ -41,7 +41,7 @@
 
 /* Overridable error handling helper macros */
 #ifdef __cplusplus
-# include "Common/Error.h"
+# include "Error.h"
 # ifndef HT_THROW_INPUT_OVERRUN
 #   define HT_THROW_INPUT_OVERRUN(_r_, _l_) \
       HT_THROWF(Error::SERIALIZATION_INPUT_OVERRUN, \

@@ -25,7 +25,7 @@ SET_DEPS(
 	NAME "SSP" 
 	REQUIRED FALSE 
 	LIB_PATHS /usr/local/lib/
-	INC_PATHS /usr/local/lib/gcc/x86_64-ubuntu-linux-gnu/8.3.0/include
+	INC_PATHS /usr/local/lib/gcc/x86_64-ubuntu-linux-gnu/${CMAKE_CXX_COMPILER_VERSION}/include
 	STATIC libssp.a
 	SHARED ssp
 	INCLUDE ssp/ssp.h

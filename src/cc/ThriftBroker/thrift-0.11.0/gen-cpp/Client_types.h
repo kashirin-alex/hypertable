@@ -15,8 +15,6 @@
 #include <thrift/protocol/TProtocol.h>
 #include <thrift/transport/TTransport.h>
 
-#include <thrift/stdcxx.h>
-
 
 namespace Hypertable { namespace ThriftGen {
 

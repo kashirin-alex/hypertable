@@ -48,9 +48,9 @@ namespace Hypertable {
 
 		// helper to initialize base class of Client
 		struct ClientHelper {
-			stdcxx::shared_ptr<transport::TSocket> socket;
-			stdcxx::shared_ptr<transport::TTransport> m_transport;
-			stdcxx::shared_ptr<protocol::TProtocol> m_protocol;
+			std::shared_ptr<transport::TSocket> socket;
+			std::shared_ptr<transport::TTransport> m_transport;
+			std::shared_ptr<protocol::TProtocol> m_protocol;
 
 			// Thrift client transport selector
 			inline transport::TTransport* select_transport(Transport ttp){
@@ -64,7 +64,7 @@ namespace Hypertable {
 
 			ClientHelper(Transport ttp, const std::string &host, int port, int timeout_ms) :
 				socket(new transport::TSocket(host, port)),
-				m_transport(stdcxx::shared_ptr<transport::TTransport>(select_transport(ttp))),
+				m_transport(std::shared_ptr<transport::TTransport>(select_transport(ttp))),
 				m_protocol(new protocol::TBinaryProtocol(m_transport)) {
 
 				socket->setConnTimeout(timeout_ms);

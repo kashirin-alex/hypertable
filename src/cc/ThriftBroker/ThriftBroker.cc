@@ -51,7 +51,7 @@
 
 #include <server/TThreadPoolServer.h>
 #include <concurrency/ThreadManager.h>
-#include <concurrency/PlatformThreadFactory.h>
+#include <concurrency/ThreadFactory.h>
 #include <transport/TServerSocket.h>
 #include <transport/TSocket.h>
 #include <transport/TBufferTransports.h>
@@ -352,7 +352,8 @@ convert_scan_spec(const ThriftGen::ScanSpec &tss, Hypertable::ScanSpec &hss) {
 
 
 void
-convert_scan_spec(const ThriftGen::ScanSpec &tss, Hypertable::ScanSpecBuilder &ssb) {
+convert_scan_spec(const ThriftGen::ScanSpec &tss, 
+                  Hypertable::ScanSpecBuilder &ssb) {
   if (tss.__isset.row_limit)
     ssb.set_row_limit(tss.row_limit);
 
@@ -822,7 +823,8 @@ void convert_schema(const ThriftGen::Schema &tschema,
   for (auto & entry : tschema.access_groups) {
     if (entry.second.name == "default")
       need_default = false;
-    Hypertable::AccessGroupSpec *ag = new Hypertable::AccessGroupSpec(entry.second.name);
+    Hypertable::AccessGroupSpec *ag = new Hypertable::AccessGroupSpec(
+      entry.second.name);
     if (entry.second.__isset.generation)
       ag->set_generation(entry.second.generation);
     ag_map[entry.second.name] = ag;
@@ -1545,7 +1547,8 @@ public:
   }
 
   void get_cell(ThriftGen::Value &result, const ThriftGen::Namespace ns,
-          const String &table, const String &row, const String &column) override {
+                const String &table, const String &row, 
+                const String &column) override {
     LOG_API_START("namespace=" << ns << " table=" << table << " row="
             << row << " column=" << column);
 
@@ -1641,7 +1644,8 @@ public:
   }
 
   void offer_cells(const ThriftGen::Namespace ns, const String &table,
-          const ThriftGen::MutateSpec &mutate_spec, const ThriftCells &cells) override {
+                   const ThriftGen::MutateSpec &mutate_spec, 
+                   const ThriftCells &cells) override {
     shared_mutator_set_cells(ns, table, mutate_spec, cells);
   }
 
@@ -1888,7 +1892,9 @@ public:
     ThriftGen::Namespace id;
     LOG_API_START("namespace =" << ns);
     try {
-      id = get_cached_object_id(std::dynamic_pointer_cast<ClientObject>(m_context.client->open_namespace(ns)));
+      id = get_cached_object_id(
+        std::dynamic_pointer_cast<ClientObject>(
+          m_context.client->open_namespace(ns)));
     } RETHROW("namespace " << ns)
     LOG_API_FINISH_E(" id=" << id);
     return id;
@@ -2690,7 +2696,8 @@ public:
   }
 
   template <class CellT>
-  void _set_cells_async(const MutatorAsync mutator, const vector<CellT> &cells) {
+  void _set_cells_async(const MutatorAsync mutator, 
+                        const vector<CellT> &cells) {
     Hypertable::Cells hcells;
     convert_cells(cells, hcells);
     TableMutatorAsync *mutator_ptr = get_mutator_async(mutator);
@@ -2724,7 +2731,8 @@ public:
   }
 
   Hypertable::Future *get_future(int64_t id) {
-    Hypertable::Future *future = dynamic_cast<Hypertable::Future *>(get_object(id));
+    Hypertable::Future *future = dynamic_cast<Hypertable::Future *>(
+      get_object(id));
     if (future == 0) {
       HT_ERROR_OUT << "Bad future id - " << id << HT_END;
       THROW_TE(Error::THRIFTBROKER_BAD_FUTURE_ID,
@@ -2735,7 +2743,8 @@ public:
 
 
   Hypertable::Namespace *get_namespace(int64_t id) {
-    Hypertable::Namespace *ns = dynamic_cast<Hypertable::Namespace *>(get_cached_object(id));
+    Hypertable::Namespace *ns = dynamic_cast<Hypertable::Namespace *>(
+      get_cached_object(id));
     if (ns == 0) {
       HT_ERROR_OUT << "Bad namespace id - " << id << HT_END;
       THROW_TE(Error::THRIFTBROKER_BAD_NAMESPACE_ID,
@@ -2747,7 +2756,8 @@ public:
   int64_t get_cached_object_id(ClientObjectPtr co) {
     int64_t id;
     std::lock_guard<std::mutex> lock(m_mutex);
-    while (!m_cached_object_map.insert(make_pair(id = Random::number32(), co)).second || id == 0); // no overwrite
+    while (!m_cached_object_map.insert(
+            make_pair(id = Random::number32(), co)).second || id == 0); // no overwrite
     return id;
   }
 
@@ -2761,7 +2771,8 @@ public:
   int64_t get_object_id(TableMutatorPtr &mutator) {
     std::lock_guard<std::mutex> lock(m_mutex);
     int64_t id = reinterpret_cast<int64_t>(mutator.get());
-    m_object_map.insert(make_pair(id, static_pointer_cast<ClientObject>(mutator))); // no overwrite
+    m_object_map.insert(
+      make_pair(id, static_pointer_cast<ClientObject>(mutator))); // no overwrite
     return id;
   }
 
@@ -2782,7 +2793,8 @@ public:
   int64_t get_scanner_id(TableScannerPtr &scanner, ScannerInfoPtr &info) {
     std::lock_guard<std::mutex> lock(m_mutex);
     int64_t id = reinterpret_cast<int64_t>(scanner.get());
-    m_object_map.insert(make_pair(id, static_pointer_cast<ClientObject>(scanner)));
+    m_object_map.insert(
+      make_pair(id, static_pointer_cast<ClientObject>(scanner)));
     m_scanner_info_map.insert(make_pair(id, info));
     return id;
   }
@@ -2814,8 +2826,8 @@ public:
     std::lock_guard<std::mutex> lock(m_mutex);
     TableScanner *scanner {};
     auto it = m_object_map.find(id);
-    if (it == m_object_map.end() ||
-        (scanner = dynamic_cast<TableScanner *>(it->second.get())) == nullptr) {
+    if(it == m_object_map.end() ||
+       (scanner = dynamic_cast<TableScanner *>(it->second.get())) == nullptr) {
       HT_ERROR_OUT << "Bad scanner id - " << id << HT_END;
       THROW_TE(Error::THRIFTBROKER_BAD_SCANNER_ID,
                format("Invalid scanner id: %lld", (Lld)id));
@@ -2877,7 +2889,8 @@ public:
     }
   }
 
-  void remove_scanner(int64_t id, ClientObjectPtr &scanner, ScannerInfoPtr &info) {
+  void remove_scanner(int64_t id, ClientObjectPtr &scanner, 
+                      ScannerInfoPtr &info) {
     std::lock_guard<std::mutex> lock(m_mutex);
     ObjectMap::iterator it = m_object_map.find(id);
     if (it != m_object_map.end()) {
@@ -2894,7 +2907,8 @@ public:
   }
 
   void shared_mutator_refresh(const ThriftGen::Namespace ns,
-          const String &table, const ThriftGen::MutateSpec &mutate_spec) override {
+                  const String &table, 
+                  const ThriftGen::MutateSpec &mutate_spec) override {
     std::lock_guard<std::mutex> lock(m_context.shared_mutator_mutex);
     SharedMutatorMapKey skey(get_namespace(ns), table, mutate_spec);
 
@@ -3118,9 +3132,10 @@ public:
 		->getPeerAddress());
   }
 
-  void releaseHandler( ::Hypertable::ThriftGen::ClientServiceIf *service) override {
+  void releaseHandler(::Hypertable::ThriftGen::ClientServiceIf *service) override {
     g_metrics_handler->connection_decrement();
-    return ServerHandlerFactory::releaseHandler(dynamic_cast<ServerHandler*>(service));
+    return ServerHandlerFactory::releaseHandler(
+      dynamic_cast<ServerHandler*>(service));
   }
 };
 
@@ -3128,7 +3143,8 @@ void set_slow_query_logging(){
   if (g_log_slow_queries->get()) {
     if(!g_slow_query_latency_threshold)
       g_slow_query_latency_threshold = 
-        properties->get_ptr<gInt32t>("ThriftBroker.SlowQueryLog.LatencyThreshold");
+        properties->get_ptr<gInt32t>(
+          "ThriftBroker.SlowQueryLog.LatencyThreshold");
     if(g_slow_query_log) 
       return;
     
@@ -3158,28 +3174,31 @@ int main(int argc, char **argv) {
     if (get_bool("ThriftBroker.Hyperspace.Session.Reconnect"))
       properties->set("Hyperspace.Session.Reconnect", true);
 
-    g_log_slow_queries = properties->get_ptr<gBool>("ThriftBroker.SlowQueryLog.Enable");
+    g_log_slow_queries = properties->get_ptr<gBool>(
+      "ThriftBroker.SlowQueryLog.Enable");
     set_slow_query_logging();
     g_log_slow_queries->set_cb_on_chg(set_slow_query_logging);
 
-    g_metrics_handler = std::make_shared<MetricsHandler>(properties, g_slow_query_log);
+    g_metrics_handler = std::make_shared<MetricsHandler>(
+      properties, g_slow_query_log);
     g_metrics_handler->start_collecting();
 
-	  std::shared_ptr<ThriftBroker::Context> context(new ThriftBroker::Context());
+	  auto context = std::make_shared<ThriftBroker::Context>();
     g_context = context.get();
 
-	  stdcxx::shared_ptr<protocol::TProtocolFactory> protocolFactory(
+	  std::shared_ptr<protocol::TProtocolFactory> protocolFactory(
 		  new protocol::TBinaryProtocolFactory());
-	  stdcxx::shared_ptr<HqlServiceIfFactory> hql_service_factory(
+	  std::shared_ptr<HqlServiceIfFactory> hql_service_factory(
 	  	new ThriftBrokerIfFactory());
-	  stdcxx::shared_ptr<TProcessorFactory> hql_service_processor_factory(
+	  std::shared_ptr<TProcessorFactory> hql_service_processor_factory(
 		  new HqlServiceProcessorFactory(hql_service_factory));
 
-	  stdcxx::shared_ptr<server::TServerTransport> serverTransport;
+	  std::shared_ptr<server::TServerTransport> serverTransport;
 	  ::uint16_t port = get_i16("port");
     if (has("thrift-timeout")) {
       int timeout_ms = get_i32("thrift-timeout");
-      serverTransport.reset(new transport::TServerSocket(port, timeout_ms, timeout_ms));
+      serverTransport.reset(
+        new transport::TServerSocket(port, timeout_ms, timeout_ms));
     } 
 	  else { 
 		  serverTransport.reset(new transport::TServerSocket(port));
@@ -3189,9 +3208,11 @@ int main(int argc, char **argv) {
 	  HT_INFOF("Starting the server with %d workers on %s transport...",
 		  (int)get_i32("workers"), get_str("thrift-transport").c_str());
 
-	  stdcxx::shared_ptr<concurrency::ThreadManager> threadManager =
-		  concurrency::ThreadManager::newSimpleThreadManager((int)get_i32("workers"));
-	  threadManager->threadFactory(std::make_shared<concurrency::PlatformThreadFactory>());
+	  std::shared_ptr<concurrency::ThreadManager> threadManager =
+		  concurrency::ThreadManager::newSimpleThreadManager(
+        (int)get_i32("workers"));
+	  threadManager->threadFactory(
+      std::make_shared<concurrency::ThreadFactory>());
 	  threadManager->start();
 
     if (get_bool("Hypertable.Config.OnFileChange.Reload")){
@@ -3201,7 +3222,7 @@ int main(int argc, char **argv) {
     }
 
 	  if (get_str("thrift-transport").compare("framed") == 0){
-		  stdcxx::shared_ptr<transport::TTransportFactory> transportFactory(
+		  std::shared_ptr<transport::TTransportFactory> transportFactory(
 			  new transport::TFramedTransportFactory());
 		  server::TThreadPoolServer server(hql_service_processor_factory,
 			  serverTransport,
@@ -3212,7 +3233,7 @@ int main(int argc, char **argv) {
 	  	server.serve();
 	  }
 	  else if (get_str("thrift-transport").compare("zlib") == 0){
-		  stdcxx::shared_ptr<transport::TTransportFactory> transportFactory(
+		  std::shared_ptr<transport::TTransportFactory> transportFactory(
 			  new transport::TZlibTransportFactory());
 		  server::TThreadPoolServer server(hql_service_processor_factory,
 			  serverTransport,
@@ -3223,7 +3244,8 @@ int main(int argc, char **argv) {
 		  server.serve();
 	  }
 	  else {
-		  HT_FATALF("No implementation for thrift transport: %s", get_str("thrift-transport").c_str());
+		  HT_FATALF("No implementation for thrift transport: %s", 
+                get_str("thrift-transport").c_str());
 		  return 0;
 	  }
 
