@@ -2497,7 +2497,7 @@ public:
   // helper methods
   void _convert_result(const Hypertable::ResultPtr &hresult,
           ThriftGen::Result &tresult) {
-  Hypertable::Cells hcells;
+    Hypertable::Cells hcells;
 
     if (hresult->is_scan()) {
       tresult.is_scan = true;
@@ -2531,7 +2531,7 @@ public:
 
   void _convert_result_as_arrays(const Hypertable::ResultPtr &hresult,
       ThriftGen::ResultAsArrays &tresult) {
-  Hypertable::Cells hcells;
+    Hypertable::Cells hcells;
 
     if (hresult->is_scan()) {
       tresult.is_scan = true;
@@ -2557,7 +2557,7 @@ public:
 
   void _convert_result_serialized(Hypertable::ResultPtr &hresult,
           ThriftGen::ResultSerialized &tresult) {
-  Hypertable::Cells hcells;
+    Hypertable::Cells hcells;
 
     if (hresult->is_scan()) {
       tresult.is_scan = true;
