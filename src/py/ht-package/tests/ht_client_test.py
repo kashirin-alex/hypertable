@@ -1,6 +1,7 @@
 
 from hypertable.hypertable_client import HypertableClient
-
+import os
+install_path = os.environ['HT_HOME']
 
 import psutil
 p = psutil.Process()
@@ -16,8 +17,8 @@ print_num_threads()
 num_ns = 24
 num_child_ns = 10
 
-ht_client = HypertableClient("/opt/hypertable/0.9.8.16/",
-                             "/opt/hypertable/0.9.8.16/conf/hypertable.cfg",
+ht_client = HypertableClient(install_path,
+                             install_path + "conf/hypertable.cfg",
                              default_timeout_ms=10000)
 
 print_num_threads()

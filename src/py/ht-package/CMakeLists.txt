@@ -81,7 +81,7 @@ if (NOT HT_COMPONENT_INSTALL OR PACKAGE_THRIFTBROKER)
 		add_test(ThriftClient-${py}-scw env ${py} ${CMAKE_CURRENT_SOURCE_DIR}/tests/client_test_scw.py)
 		add_test(ThriftClient-${py}-scr env ${py} ${CMAKE_CURRENT_SOURCE_DIR}/tests/client_test_scr.py)
 		add_test(HypertableClient-${py} 
-							env LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${INSTALL_DIR}/lib 
+							env LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${INSTALL_DIR}/lib HT_HOME=${INSTALL_DIR} 
 							${py} ${CMAKE_CURRENT_SOURCE_DIR}/tests/ht_client_test.py)
 
 		install( CODE "execute_process(COMMAND  cmake -E chdir ${HYPERTABLE_BINARY_DIR}/src/py/ht-package/pkg/dist ${py} -m pip install --verbose --upgrade hypertable-${VERSION}.tar.gz;)")
