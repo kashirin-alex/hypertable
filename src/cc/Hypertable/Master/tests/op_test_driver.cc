@@ -951,7 +951,7 @@ void balance_plan_authority_test(ContextPtr &context) {
   out.flush();
 
   // remove the timestamp, then compare against the golden file
-  String cmd = "cat balance_plan_authority_test.output | perl -e 'while (<>) { s/timestamp=.*?201\\d,/timestamp=0,/g; print; }' > output; diff output balance_plan_authority_test.golden";
+  String cmd = "cat balance_plan_authority_test.output | perl -e 'while (<>) { s/timestamp=.*\\d,flags/timestamp=0,flags/g; print; }' > output; diff output balance_plan_authority_test.golden";
   if (system(cmd.c_str()) != 0) {
     std::cout << "balance_plan_authority_test.output differs from golden file\n";
     quick_exit(EXIT_FAILURE);
