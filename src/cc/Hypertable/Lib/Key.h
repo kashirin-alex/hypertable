@@ -25,7 +25,6 @@
 #include <iostream>
 
 #include <boost/shared_array.hpp>
-#include <boost/detail/endian.hpp>
 
 #include "Common/ByteString.h"
 #include "Common/DynamicBuffer.h"
